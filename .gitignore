@@ -1,0 +1,33 @@
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
+# Ficheros binarios
+bin/
+*.exe
+
+# Ejecutables de go
+*.test
+
+# Ficheros de paquetes
+*.out
+*.tar.gz
+
+# Ficheros de cobertura
+*.cover
+
+# Ficheros de log
+*.log
+
+# Directorios de construcción
+build/
+
+# Directorios de dependencias
+vendor/
+
+# Binarios de depuración
+.debug/
+
+# Ficheros de configuración local
+.env
