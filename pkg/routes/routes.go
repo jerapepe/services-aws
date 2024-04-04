@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -54,15 +55,40 @@ func AwsUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	resultadoCh := make(chan map[string]interface{})
+	errCh := make(chan error)
+	var wg sync.WaitGroup
+
 	if r.Method == http.MethodPost {
-		r.ParseMultipartForm(10 << 20)
-		file, handler, err := r.FormFile("file")
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			r.ParseMultipartForm(10 << 20)
+			file, handler, err := r.FormFile("file")
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			defer file.Close()
+			fmt.Println(handler.Filename)
+			w.WriteHeader(http.StatusOK)
+			response := map[string]interface{}{"message": "File uploaded successfully"}
+			resultadoCh <- response
+		}()
+
+		go func() {
+			wg.Wait()
+			close(resultadoCh)
+			close(errCh)
+		}()
+
+		select {
+		case res := <-resultadoCh:
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(res)
+		case err := <-errCh:
+			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
-		defer file.Close()
-		fmt.Println(handler.Filename)
-		w.WriteHeader(http.StatusOK)
+
 	}
 }

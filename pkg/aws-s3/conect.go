@@ -10,7 +10,6 @@ import (
 )
 
 func ConectClient() {
-
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal(err)
